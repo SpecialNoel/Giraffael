@@ -1,0 +1,2 @@
+# Giraffael
+A chatting application.
