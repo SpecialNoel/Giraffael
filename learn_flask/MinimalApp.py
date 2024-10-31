@@ -1,23 +1,25 @@
 from flask import Flask
+from flask import render_template
+from flask import request
 from flask import url_for
 from markupsafe import escape
 
-# ** Run the application
+# ** Run the Application
 # To activate the .venv environment: . .venv/bin/activate
 # To run this application: flask --app MinimalApp run
 # Shortcut: if the file is named app.py or wsgi.py, don't have to use --app.
 
-# ** --host option
+# ** --host Option
 # The server is only accessible from this computer because it is in debugging mode.
 # If trust other users on your network, use option: --host=0.0.0.0
 #   to tell your OS to listen on all public IPs.
 
-# ** --debug option
+# ** --debug Option
 # Enabling debug mode allows the server to reload automatically if code changes.
 # To enable debug mode, use option: --debug
 # Warning: do not run the development server or debugger in a production environment.
 
-# ** HTML escaping
+# ** HTML Escaping
 # Need to escape HTML to protect from injection attacks.
 # Escaping renders things like <script>alert("bad")</script> as text, rather than running an actual script.
 # Jinja will do this automatically on HTML templates.
@@ -36,14 +38,68 @@ from markupsafe import escape
 # Use url_for() to build a URL to a specific function.
 # The generated paths are always absolute.
 
-# ** HTTP
+# ** HTTP Methods
+# Use methods=[] argument of app.route() to handle different HTTP methods.
+# Or, use shortcut app.get(URL), app.post(URL), etc..
 
+# ** Static Files
+# CSS and JS files should be stored in a folder named 'static'.
+
+# ** Rendering Templates
+# Use Jinja2 template to generate HTML (or other type of text files) within Python.
+# Use render_template() to render a template.
+# Flask will look for templates in the 'templates' folder.
+
+# ** Accessing Request Data
+# Use the global 'request' object to access data a client sends to the server.
+
+# ** Context Locals:
+# The reason why the 'request' object is global, and that Flask manages to still
+#   be threadsafe even it contains that global object.
+# A request comes in and web server decides to spawn a new thread.
+# When Flask starts its internal request handling, it figures out that 
+#   the current thread is the active context, and binds the current application
+#   and the WSGI environment to that context (thread).
+# It does that in a way that one app can invoke another app without breaking.
+# This is particularly useful for unit testing.
+# Use app.test_request_context(URL, method='') for unit testing.
+
+# ** The 'request' Object
+# Use the 'form' attribute to access form data.
+# Use request.args.get(parameter, '') to access parameters submitted in the URL such as (?key=value).
+# Read the API for 'request' for more.
+
+# ** File Uploads
+# 
 
 app = Flask(__name__)
 
-@app.route('/')
+def validate_login(username, password):
+    # Validate user inputted username and password.
+    # If valid, return True; return False otherwise.
+    pass
+
+def log_user_in(username):
+    # Log the user in with username
+    pass
+
+@app.route('/', methods=['POST', 'GET'])
 def index():
-    return 'This is the Main Page.'
+    print('This is the main page. /nYou can login here with your username and password.')
+    error = None
+    if request.method == 'POST':
+        if validate_login(request.form['username'], request.form['password']):
+            return log_user_in(request.form['username'])
+        else:
+            error = 'Invalid username/password'
+    return render_template('login.html', error=error)
+
+@app.route('/hello/')
+@app.route('/hello/<name>')
+def say_hi(name=None):
+    # Automatic escaping is enabled with render_template()
+    # This meas that person will be escaped if it contains HTML contents
+    return render_template('hello.html', person=name)
 
 # <username> is a variable name that client can input to get to this page
 # e.g.: http://127.0.0.1:5000/u will have 'Hello, u' on the page
@@ -55,4 +111,6 @@ def welcome_user(username):
 with app.test_request_context():
     print()
     print('URL for the index/main page:', url_for('index'))
+    print('URL for style.css:', url_for('static', filename='style.css'))
     print()
+    
