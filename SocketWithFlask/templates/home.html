@@ -1,0 +1,24 @@
+<!-- home.html -->
+
+{% extends "base.html" %} 
+
+{% block head %}
+{{ super() }}
+<style type="text/css">
+  h1 {
+    color: #0080ff;
+  }
+</style>
+{% endblock %} 
+
+{% block title %}
+Home Page
+{% endblock %} 
+
+{% block body %}
+{% if user_level == 'Server' %}
+<h1>Hello {{ user_level }}!</h1>
+{% elif user_level %}
+<h1>Default: Hello, {{user_level}}!</h1>
+{% endif %}
+{% endblock %}

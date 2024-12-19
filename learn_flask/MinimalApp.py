@@ -1,8 +1,7 @@
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import url_for
+import os
+from flask import Flask, flash, render_template, request, redirect, url_for
 from markupsafe import escape
+from werkzeug.utils import secure_filename
 
 # ** Run the Application
 # To activate the .venv environment: . .venv/bin/activate
@@ -70,9 +69,38 @@ from markupsafe import escape
 # Read the API for 'request' for more.
 
 # ** File Uploads
-# 
+# Set enctype="multipart/form-data" on HTML <form> tag to enable file uploading.
+# Use 'request.files[]' to access uploaded files.
+
+UPLOAD_FOLDER = './uploadedFiles'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg'} # prevent XSS problems
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Check if the extension of the filename uploaded by the user is valid
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Transmit the file uploaded by the user to UPLOAD_FOLDER
+@app.route('/upload', methods=['GET', 'POST']) 
+def upload():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        
+        f = request.files['file']
+        if f.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        
+        if f and allowed_file(f.filename):
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('download_file', name=filename))
+        
+    return render_template('download_file.html', name=filename)
 
 def validate_login(username, password):
     # Validate user inputted username and password.
@@ -83,7 +111,7 @@ def log_user_in(username):
     # Log the user in with username
     pass
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/login', methods=['POST', 'GET'])
 def index():
     print('This is the main page. /nYou can login here with your username and password.')
     error = None
@@ -103,7 +131,7 @@ def say_hi(name=None):
 
 # <username> is a variable name that client can input to get to this page
 # e.g.: http://127.0.0.1:5000/u will have 'Hello, u' on the page
-@app.route('/<username>')
+@app.route('/user/<username>')
 def welcome_user(username):
     return f'Hello, {username}. This is your user page'
 
