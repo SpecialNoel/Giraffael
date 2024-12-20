@@ -2,7 +2,6 @@
 # Run: `python3 Client.py` to start the Client side
 
 import socketio
-import time
 
 # Initialize socketio.
 clientSIO = socketio.Client()
@@ -23,10 +22,9 @@ def disconnect():
 
 if __name__== '__main__':
     clientSIO.connect(url='http://127.0.0.1:5000', transports=['websocket'])
-    print("Socket established")
         
     msg = 'Hello! This is Client'
-    clientSIO.emit('Message from Client:', msg)
+    clientSIO.emit('server-receive-message', msg)
     
     clientSIO.wait()
     

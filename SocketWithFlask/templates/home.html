@@ -4,11 +4,19 @@
 
 {% block head %}
 {{ super() }}
-<style type="text/css">
-  h1 {
-    color: #0080ff;
-  }
-</style>
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+
+<script>
+  $(document).ready(function() {
+    const socket = io.connect('http://127.0.0.1:5001');
+
+    socket.on('after connect', function(msg)
+    {
+      console.log('After connect', msg);
+    });
+  });
+</script>
 {% endblock %} 
 
 {% block title %}
@@ -16,9 +24,5 @@ Home Page
 {% endblock %} 
 
 {% block body %}
-{% if user_level == 'Server' %}
-<h1>Hello {{ user_level }}!</h1>
-{% elif user_level %}
-<h1>Default: Hello, {{user_level}}!</h1>
-{% endif %}
+
 {% endblock %}
