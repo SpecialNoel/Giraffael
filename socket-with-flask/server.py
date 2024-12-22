@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key!'
 socketio = SocketIO(app)
 
-clients = [] # store all currently connected clients
+connected_clients = [] # store all currently connected clients
 
 ''' Frontend Page '''
 @app.route('/')
@@ -20,33 +20,35 @@ def index():
 ''' Socket Related '''    
 @socketio.on('connect')
 def handle_connect():
-    print(f'Client [{request.sid}] connected successfully')
-    clients.append(request.sid)
+    print(f'***Client [{request.sid}] connected successfully***')
+    connected_clients.append(request.sid)
     display_connecting_clients()
-    emit('after connect', {'data':'Lets dance'})
+    emit('connect', {'clientId':request.sid})
+    emit('client_list_update', {'clients':connected_clients})
     
 @socketio.on('disconnect')
 def handle_disconnect():
-    print(f'Client [{request.sid}] disconnected successfully')
-    clients.remove(request.sid)
+    print(f'***Client [{request.sid}] disconnected successfully***')
+    connected_clients.remove(request.sid)
     display_connecting_clients()
+    emit('client_list_update', {'clients':connected_clients})
     
-@socketio.on('server-receive-message')
+@socketio.on('receive-message')
 def handle_receive_message(data):
-    print(f'Received message from Client [{request.sid}]')
-    print('Message:', data)
+    print(f'***Received message from Client [{request.sid}]***')
+    print(f'***Message: {data['msg']}***')
     
     data = 'Hi [' + request.sid + '], this is a response sent from Server!'
     handle_send_message(request.sid, data)
     
-@socketio.on('server-send-message')
+@socketio.on('send-message')
 def handle_send_message(client_id, data):
-    print(f'Send message to Client [{client_id}]:', data)
-    emit('response:', data, room=client_id)
+    print(f'***Send message to Client [{client_id}]: {data}***')
+    emit('response', data, room=client_id)
     
 ''' Helper Functions '''
 def display_connecting_clients():
-    print('Current connecting Clients: ', clients)
+    print(f'***Current connecting Clients: {connected_clients}***')
 
 ''' Main '''
 if __name__=='__main__':
