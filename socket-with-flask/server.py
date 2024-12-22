@@ -24,14 +24,14 @@ def handle_connect():
     connected_clients.append(request.sid)
     display_connecting_clients()
     emit('connect', {'clientId':request.sid})
-    emit('client_list_update', {'clients':connected_clients})
+    emit('client_list_update', {'clients':connected_clients}, broadcast=True)
     
 @socketio.on('disconnect')
 def handle_disconnect():
     print(f'***Client [{request.sid}] disconnected successfully***')
     connected_clients.remove(request.sid)
     display_connecting_clients()
-    emit('client_list_update', {'clients':connected_clients})
+    emit('client_list_update', {'clients':connected_clients}, broadcast=True)
     
 @socketio.on('receive-message')
 def handle_receive_message(data):
