@@ -3,54 +3,57 @@
 {% extends "base.html" %}
 
 <!-- Head -->
-{% block head %} {{ super() }}
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+{% block head %} 
+{{ super() }} 
 {% endblock %}
 
 <!-- Title -->
-{% block title %} Home Page {% endblock %}
+{% block title %} 
+Home Page 
+{% endblock %}
 
 <!-- Body -->
 {% block body %}
-<h3>Current connecting clients:</h3>
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
 
+<h3>Current connecting clients:</h3>
 <div id="client-list"></div>
 
 <script>
-  // Client side connection
-  $(document).ready(function () {
+// Client side connection
+$(document).ready(function () {
     // Connect the Client who opened this web page to the Server
     const socket = io.connect("http://127.0.0.1:5001");
     let currClientId = "";
 
     socket.on("connect", (data) => {
-      if (data) {
+    if (data) {
         currClientId = data.clientId;
         console.log(`Connected to server with Id: ${data.clientId}`);
-      }
+    }
     });
 
     socket.on("response", (data) => {
-      console.log(data);
+    console.log(data);
     });
 
     socket.on("client_list_update", (data) => {
-      const clientList = document.getElementById("client-list");
-      clientList.innerHTML = "";
-      data.clients.forEach((clientId, i) => {
+    const clientList = document.getElementById("client-list");
+    clientList.innerHTML = "";
+    data.clients.forEach((clientId, i) => {
         const listItem = document.createElement("li");
         listItem.textContent = "Client " + i + ": " + clientId;
         clientList.appendChild(listItem);
-      });
-      console.log("Updated connected client list shown on web page.");
+    });
+    console.log("Updated connected client list shown on web page.");
     });
 
     socket.emit("receive-message", {
-      msg: "Hello, server.",
+    msg: "Hello, server.",
     });
     console.log("Sent a message to the server.");
-  });
+});
 </script>
 
 {% endblock %}
