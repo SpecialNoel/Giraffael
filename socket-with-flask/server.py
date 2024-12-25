@@ -17,6 +17,17 @@ connected_clients = [] # store all currently connected clients
 def index():
     return render_template('home.html')
 
+@app.route('/', methods=['POST'])
+def handle_enter_room_id_form_post():
+    room_id = request.form['room-id']
+    print(f'***Received client input for enter-room-id: {room_id}***')
+    return
+    
+@app.route('/room1', methods=['POST'])
+def handle_enter_room1_get():
+    print(f'***Received client input of clicking the Enter-Room1 button.***')
+    return render_template('room.html')
+
 ''' Socket Related '''    
 @socketio.on('connect')
 def handle_connect():

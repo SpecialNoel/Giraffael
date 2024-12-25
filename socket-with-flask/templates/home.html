@@ -17,43 +17,21 @@ Home Page
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
 
+<script src="../static/client.js"></script>
+
+<form action="/" method="post" id="enter-room-id-form">
+    <label>Enter room id: </label>
+    <input type="text" name="room-id" required />
+    <input type="submit" value="Enter Room" />
+</form>
+
+<form action="/room1" method="post">
+    <input type="button" value="Enter Room1" id="button-to-room1"/>
+</form>
+
 <h3>Current connecting clients:</h3>
 <div id="client-list"></div>
 
-<script>
-// Client side connection
-$(document).ready(function () {
-    // Connect the Client who opened this web page to the Server
-    const socket = io.connect("http://127.0.0.1:5001");
-    let currClientId = "";
-
-    socket.on("connect", (data) => {
-    if (data) {
-        currClientId = data.clientId;
-        console.log(`Connected to server with Id: ${data.clientId}`);
-    }
-    });
-
-    socket.on("response", (data) => {
-    console.log(data);
-    });
-
-    socket.on("client_list_update", (data) => {
-    const clientList = document.getElementById("client-list");
-    clientList.innerHTML = "";
-    data.clients.forEach((clientId, i) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = "Client " + i + ": " + clientId;
-        clientList.appendChild(listItem);
-    });
-    console.log("Updated connected client list shown on web page.");
-    });
-
-    socket.emit("receive-message", {
-    msg: "Hello, server.",
-    });
-    console.log("Sent a message to the server.");
-});
-</script>
+<script>execute_client();</script>
 
 {% endblock %}
