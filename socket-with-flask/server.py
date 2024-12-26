@@ -23,9 +23,8 @@ def handle_enter_room_id_form_post():
     print(f'***Received client input for enter-room-id: {room_id}***')
     return
     
-@app.route('/room1', methods=['POST'])
+@app.route('/room1')
 def handle_enter_room1_get():
-    print(f'***Received client input of clicking the Enter-Room1 button.***')
     return render_template('room.html')
 
 ''' Socket Related '''    
@@ -57,6 +56,12 @@ def handle_send_message(client_id, data):
     print(f'***Send message to Client [{client_id}]: {data}***')
     emit('response', data, room=client_id)
     
+@socketio.on('to-room1')
+def handle_to_room1_request():
+    print(f'***Received client input of clicking the Enter-Room1 button.***')
+    data = 'http://127.0.0.1:5001/room1'
+    emit('redirect_to_room1', data)
+
 ''' Helper Functions '''
 def display_connecting_clients():
     print(f'***Current connecting Clients: {connected_clients}***')
