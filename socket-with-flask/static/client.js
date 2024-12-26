@@ -2,7 +2,7 @@
 
 function execute_client() {
     // Client side connection
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', () => {
         // Connect the client who opened this web page to the Server
         const socket = io.connect("http://127.0.0.1:5001");
         let currClientId = "";
@@ -33,5 +33,20 @@ function execute_client() {
         msg: "Hello, server.",
         });
         console.log("Sent a message to the server.");
+
+        modify_form(socket);
+
+        socket.on("redirect_to_room1", (data) => {
+            window.location.href = data; 
+        });
+    });
+}
+
+function modify_form(socket) {
+    const room1Button = document.getElementById('button-to-room1');
+
+    room1Button.addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit("to-room1");
     });
 }
