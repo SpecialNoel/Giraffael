@@ -1,7 +1,7 @@
 # Server.py
 # Run: `python3 Server.py` to start the web Server
 
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, session
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 from flask_socketio import ConnectionRefusedError, Namespace
 
@@ -17,15 +17,6 @@ connected_clients = [] # store all currently connected clients
 def index():
     return render_template('home.html')
 
-@app.route('/', methods=['POST'])
-def handle_enter_room_id_form_post():
-    room_id = request.form['room-id']
-    print(f'***Received client input for enter-room-id: {room_id}***')
-    return
-    
-@app.route('/room1')
-def handle_enter_room1_get():
-    return render_template('room.html')
 
 ''' Socket Related '''    
 @socketio.on('connect')
@@ -36,6 +27,7 @@ def handle_connect():
     emit('connect', {'clientId':request.sid})
     emit('client_list_update', {'clients':connected_clients}, broadcast=True)
     
+    
 @socketio.on('disconnect')
 def handle_disconnect():
     print(f'***Client [{request.sid}] disconnected successfully***')
@@ -43,28 +35,33 @@ def handle_disconnect():
     display_connecting_clients()
     emit('client_list_update', {'clients':connected_clients}, broadcast=True)
     
+    
 @socketio.on('receive-message')
 def handle_receive_message(data):
     print(f'***Received message from Client [{request.sid}]***')
     print(f'***Message: {data['msg']}***')
     
-    data = 'Hi [' + request.sid + '], this is a response sent from Server!'
-    handle_send_message(request.sid, data)
+
+@socketio.on('join')
+def handle_join(data):
+    username = session['username']
+    room = data['room']
+    join_room(room)
+    emit('response', username + ' has entered the room.', to=room)
     
-@socketio.on('send-message')
-def handle_send_message(client_id, data):
-    print(f'***Send message to Client [{client_id}]: {data}***')
-    emit('response', data, room=client_id)
     
-@socketio.on('to-room1')
-def handle_to_room1_request():
-    print(f'***Received client input of clicking the Enter-Room1 button.***')
-    data = 'http://127.0.0.1:5001/room1'
-    emit('redirect_to_room1', data)
+@socketio.on('leave')
+def handle_leave(data):
+    username = session['username']
+    room = data['room']
+    leave_room(room)
+    emit('response', username + ' has left the room.', to=room)
+
 
 ''' Helper Functions '''
 def display_connecting_clients():
     print(f'***Current connecting Clients: {connected_clients}***')
+
 
 ''' Main '''
 if __name__=='__main__':
