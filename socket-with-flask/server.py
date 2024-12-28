@@ -62,7 +62,7 @@ def handle_leave(data):
 def display_connecting_clients():
     print(f'***Current connecting Clients: {connected_clients}***')
 
-
+ 
 ''' Main '''
 if __name__=='__main__':
     socketio.run(app, host='127.0.0.1', port=5001) # port cannot be 5000
