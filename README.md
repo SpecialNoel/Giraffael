@@ -43,5 +43,5 @@ Giraffael
          ├─ client_service.py
          ├─ connection_manager.py
          └─ pub_sub_service.py
-
+         
 ```
