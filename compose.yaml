@@ -1,0 +1,76 @@
+# compose.yaml
+# The compose file for Giraffael that defines how to run the Dockerfiles inside /docker
+# Run this file: docker compose up --build -d
+# Stop running: docker compose down
+# Check status: docker compose ps 
+# Check logs:   docker compose logs -f [service_name]
+
+# - References on used port numbers: 
+# 80:   HTTP
+# 3000: React
+# 6379: Redis
+# 8000: Python3 HTTP server
+
+# - References on Docker compose services and attributes:
+# build:          specifies the build configuration for creating a container image from source
+# command:        overrides the default command (i.e. the Dockerfile's CMD) declared by the container image
+# container_name: specifies a custom container name
+# context:        defines the path to a dir containing a Dockerfile
+# depends_on:     specifies the order of service startup and shutdown
+# dockerfile:      specifies the Dockerfile to be used for this service
+# environment:    exports the host and port variables to be accessible by os.getenv()
+# expose:         defines the incoming port or a range of ports that Compose exposes from the container
+# image:          specifies the image to start the container from
+# networks:       defines the networks that service containers are attached to
+# ports:          defines the port mappings between the host machine and the containers; [Host:Container]
+# REDIS_HOST:     connects to the Redis container via Docker DNS
+# restart:        defines the policy that the platform applies on container termination
+# volumes:        defines mount host paths or named volumes that are accessible by service containers
+
+name: Giraffael
+
+services:
+  redis: # Server api talks to Redis via redis:6379
+    image: redis:latest
+    expose: 
+      - "6379" 
+    networks:
+      - giraffael_net
+    volumes:
+      - ./infra/docker/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: unless-stopped
+    container_name: giraffael_redis
+
+  api: # Frontend talks to server api via http://api:8000
+    build: 
+      context: .
+      dockerfile: infra/docker/server.Dockerfile 
+    ports: 
+      - "8000:8000"
+    networks:
+      - giraffael_net
+    environment:
+      REDIS_HOST: redis 
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+    container_name: giraffael_api
+
+# ------------------------------------ Frontend commented for now. Focus on developing other logics
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: infra/docker/client.Dockerfile 
+  #   ports:
+  #     - "80:3000"
+  #   networks:
+  #     - giraffael_net
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
+  #   container_name: giraffael_frontend
+
+networks: 
+  giraffael_net: 
