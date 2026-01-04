@@ -173,5 +173,5 @@ cython_debug/
 # SSL
 *.pem
 
-# env folder for Giraffael2
+# env folder for Giraffael
 /Giraffael-env
