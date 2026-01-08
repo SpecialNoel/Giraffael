@@ -8,11 +8,37 @@ from client.src.transport.send_msg import (send_chat_message,
                                            send_disconnect_request)
 from client.src.transport.recv_msg import receive_msg
 
-async def user_input_loop():
+async def user_input_loop(websocket, http_uri, username, room_code, uuid):
+    async def send(msg_type, http_uri=None, username=None, uuid=None, room_code=None, websocket=None, msg=None):
+        if msg_type == 'chat':
+            await send_chat_message(room_code, str(uuid), msg, websocket)
+        elif msg_type == 'create':
+            await send_create_room_request(http_uri, username, room_code)
+        elif msg_type == 'disconnect':
+            await send_disconnect_request(websocket)
+        return
+
+    msg_type_prompt = (f'\nEnter "create" to create a room with room code {room_code}.\n'
+                        'Enter "disconnect" to disconnect from server.\n'
+                        'Enter "chat" to start chatting.\n')
+    msg_prompt = ('\nEnter "disconnect" to disconnect from server.\n'
+                  'Enter anything else to input your message.\n')
+    while True:
+        msg_type = input(msg_type_prompt).lower()
+        
+        if msg_type == 'chat':
+            msg = input(msg_prompt).lower()
+            await send(msg_type, http_uri, username, uuid, room_code, websocket, msg)
+        elif msg_type == 'create' or msg_type == 'disconnect':
+            await send(msg_type, http_uri, username, uuid, room_code, websocket, '')
+            if msg_type == 'disconnect':
+                break
+        else:
+            print('Please enter a valid option.\n')
     return
 
-async def connect(base_ws_uri, room_code, uuid, username, ):
-    uri = base_ws_uri + f'?room_code={room_code}&uuid={uuid}&username={username}'
+async def connect(ws_uri, http_uri, room_code, uuid, username):
+    uri = ws_uri + f'?room_code={room_code}&uuid={uuid}&username={username}'
     print(f'uri: [{uri}].')
     
     # Client connects to server via WebSocket endpoint
@@ -28,9 +54,9 @@ async def connect(base_ws_uri, room_code, uuid, username, ):
         
         # Start receiving heartbeat in the background
         receiver_thread = asyncio.create_task(receive_msg(websocket))
-        sender_thread = asyncio.create_task(user_input_loop(websocket, room_code, uuid))
+        sender_thread = asyncio.create_task(user_input_loop(websocket, http_uri, username, room_code, uuid))
         
-        # Wait until either finishes (either disconnects or error occurs)
+        # Wait until either thread to finish (either disconnects or error occurs)
         done, pending = await asyncio.wait(
             [receiver_thread, sender_thread],
             return_when=asyncio.FIRST_COMPLETED
@@ -40,15 +66,3 @@ async def connect(base_ws_uri, room_code, uuid, username, ):
         for task in pending:
             task.cancel()
         print('Client loop ended.')
-
-async def send(type, http_uri=None, username=None, uuid=None, room_code=None, websocket=None, msg=None):
-    if type == 'chat':
-        send_chat_message(room_code, uuid, msg, websocket)
-    elif type == 'create':
-        send_create_room_request(http_uri, username, room_code)
-    elif type == 'disconnect':
-        send_disconnect_request(websocket)
-    return
-
-async def receive():
-    return

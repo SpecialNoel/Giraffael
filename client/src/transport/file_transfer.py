@@ -18,7 +18,8 @@ def upload(uri, roomCode, filename):
     def ask_file_location(filename, fileExtension):
         root = tk.Tk()
         root.withdraw()
-        filepath = filedialog.askopenfilename(defaultextension=fileExtension, initialfile=filename)
+        filepath = filedialog.askopenfilename(defaultextension=fileExtension, 
+                                           initialfile=filename)
         return filepath
     
     fileExtension = get_file_extension(filename)
@@ -50,7 +51,7 @@ def download(uri, roomCode, filename, chunkSize):
         root = tk.Tk()
         root.withdraw() # This hides the main window of Tk
         savePath = filedialog.asksaveasfilename(defaultextension=fileExtension, 
-                                                initialfile=filename)
+                                              initialfile=filename)
         return savePath
     
     # Setting 'stream' to True allows the client to download the file without loading it into memory

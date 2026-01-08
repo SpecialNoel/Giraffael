@@ -1,6 +1,7 @@
 # compose.yaml
 # The compose file for Giraffael that defines how to run the Dockerfiles inside /docker
-# Run this file: docker compose up --build -d
+# Run this file: docker compose up -d
+# OR: Run after modifying compose.yaml: docker compose up --build -d
 # Stop running: docker compose down
 # Check status: docker compose ps 
 # Check logs:   docker compose logs -f [service_name]
@@ -30,15 +31,17 @@
 name: Giraffael
 
 services:
-  redis: # Server api talks to Redis via redis:6379
+  redis-server: # Server api talks to Redis server via redis://redis:6379
     image: redis:latest
-    expose: 
-      - "6379" 
+    expose: # Only the server api initiated within Docker container can talk to Redis server
+      - "6379"
+    # ports: # Any host can talk to Redis server (e.g. with command 'redis-cli ping')
+    #   - "6379:6379"
     networks:
       - giraffael_net
     volumes:
-      - ./infra/docker/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+      - redis-data:/data
+    command: ["redis-server"]
     restart: unless-stopped
     container_name: giraffael_redis
 
@@ -50,11 +53,14 @@ services:
       - "8000:8000"
     networks:
       - giraffael_net
+    env_file:
+      - .env
     environment:
-      REDIS_HOST: redis 
+      REDIS_HOST: redis-server 
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
     depends_on:
-      - redis
+      - redis-server
     restart: unless-stopped
     container_name: giraffael_api
 
@@ -74,3 +80,6 @@ services:
 
 networks: 
   giraffael_net: 
+
+volumes:
+  redis-data:

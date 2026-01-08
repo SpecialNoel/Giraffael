@@ -9,9 +9,10 @@ async def receive_msg(websocket):
             msg = json.loads(raw_msg)
             
             if msg.get('type') == 'ping':
+                print('Received a ping from server.')
                 # Handle ping signal by sending back a pong to server 
                 await websocket.send(json.dumps({'type': 'pong'}))
-                print('\nSent pong to server')
+                print('\nSent a pong to server')
             else:
                 # Handle other messages
                 await handle_incoming_message(msg)

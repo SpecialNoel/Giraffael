@@ -1,5 +1,11 @@
 # client_service.py
 
+# Steps to inspect the keys stored in Redis (without <>): 
+# 1. docker exec -it <container_name> sh
+# 2. redis-cli
+# 3. KEYS *
+# 4. GET <key_name>
+
 import json
 import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
@@ -38,6 +44,8 @@ async def connect_with_client(redis, active, websocket: WebSocket, TIME_THRESHOL
         # Get room code, uuid and username inputted by the client
         room_code, uuid, username = get_client_info(websocket)
         
+        print(f'room code: {room_code}, uuid: {uuid}, username: {username}')
+        
         # Check if received room code, uuid and username match in MongoDB
         # await check_if_client_info_match_in_db(room_code, uuid, username)
         # print('Client info matched.')
@@ -51,11 +59,14 @@ async def connect_with_client(redis, active, websocket: WebSocket, TIME_THRESHOL
         print('Added client to local active client list.')
         
         # Add this client to Redis
-        await redis.sadd(f'room_code:{room_code}:client_list', str(uuid))
+        client_list_set = f'room_code:{room_code}:client_list'
+        await redis.sadd(client_list_set, str(uuid))
         print('Added client to Redis.')
         
+        await redis.delete('foo')
+        
         # Print clients that are currently connected to Redis
-        current_client_list = await redis.smembers(f'room_code:{room_code}:client_list')
+        current_client_list = await redis.smembers(client_list_set)
         print(f'Current clients in room [{room_code}] in redis:', current_client_list)
         
         # Server sends a succeeded status to the client
@@ -81,10 +92,12 @@ async def connect_with_client(redis, active, websocket: WebSocket, TIME_THRESHOL
                 # Heartbeat: if no message received within TIME_THRESHOLD, send a ping to client
                 await websocket.send_json({'type': 'ping'})
                 print(f'Sent ping to [{uuid}] in room [{room_code}].')
-    except WebSocketDisconnect:
+    except WebSocketDisconnect as wsde:
         print(f'Client [{uuid}] disconnects from server.')
-    except:
+        print(f'Exception: {wsde}')
+    except Exception as e:
         print(f'Error in connection with [{uuid}].')
+        print(f'Exception: {e}')
         # Server sends a failed status to the client
         data = {
             'message': f'Client encountered error when connecting to server.',

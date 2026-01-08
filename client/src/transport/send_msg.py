@@ -3,11 +3,11 @@
 import json
 import requests
 
-async def send_chat_message(room_code, uuid, user_input, websocket):
+async def send_chat_message(room_code, uuid_str, user_input, websocket):
     msg = {
         'type': 'chat',
         'room_code': room_code,
-        'uuid': uuid,
+        'uuid': uuid_str,
         'payload': user_input,
     }
     await websocket.send(json.dumps(msg))

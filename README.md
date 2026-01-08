@@ -9,5 +9,5 @@ Checkout Giraffael on [this Notion page](https://www.notion.so/Project-Giraffael
 ## Instructions to run the project:
 
 1. Build docker: `docker compose up --build -d`
-2. Run client side: ``
+2. Run client side: `python3 -m client.src.app.client_chat`
 3. To stop running: `docker compose down`

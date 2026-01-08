@@ -1,6 +1,6 @@
 # client_chat.py
 
-# python3 -m client.src.app.client_chat
+# To run this script: python3 -m client.src.app.client_chat
 
 import asyncio
 import uuid
@@ -17,6 +17,9 @@ if __name__=='__main__':
         'room_code': 'fWpO003k8b2',
         'client_uuid': uuid.uuid4()
     }
-    asyncio.run(connect(base_ws_uri, client_for_testing['room_code'], 
-                        client_for_testing['client_uuid'], client_for_testing['username']))
+    asyncio.run(connect(base_ws_uri, 
+                        base_http_uri,
+                        client_for_testing['room_code'], 
+                        client_for_testing['client_uuid'], 
+                        client_for_testing['username']))
     

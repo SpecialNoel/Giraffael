@@ -175,3 +175,6 @@ cython_debug/
 
 # env folder for Giraffael
 /Giraffael-env
+
+# Redis configuration file
+redis.conf
