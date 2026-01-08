@@ -2,7 +2,8 @@
 
 # Redis is used to transfer messages from the sender to the channel.
 
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from src.schemas.definitions import Message
 
 # Redis subscribes to the channel (NOT client subscribe to channel)
@@ -36,12 +37,15 @@ async def publish_to_channel(redis, room_code, msg: Message):
 
 # Publish chat message to channel via Redis
 async def publish_chat_msg_to_channel(room_code, uuid, chat_msg):
+    tz_NY = ZoneInfo('America/New_York')
+    current_time = datetime.datetime.now(tz=tz_NY)
+    
     msg = Message(
         type='chat',
         room_code=room_code,
         sender=uuid,
         payload={'data': chat_msg},
-        timestamp=datetime.now(tz=timezone.utc)
+        timestamp=current_time
     )
     await publish_to_channel(room_code, msg)
     return

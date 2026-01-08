@@ -1,12 +1,14 @@
 # create_op.py
 
 import datetime
+from zoneinfo import ZoneInfo
 from src.db.mongo.mongodb_initiator import rooms_collection
 
 # Create a room in MongoDB
 def create_room_in_db(room_code, roomName='NewRoom'):
     try: 
-        current_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        tz_NY = ZoneInfo('America/New_York')
+        current_time = datetime.datetime.now(tz=tz_NY)
         
         # Room default template
         room_data = {
