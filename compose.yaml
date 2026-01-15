@@ -63,21 +63,7 @@ services:
       - redis-server
     restart: unless-stopped
     container_name: giraffael_api
-
-# ------------------------------------ Frontend commented for now. Focus on developing other logics
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: infra/docker/client.Dockerfile 
-  #   ports:
-  #     - "80:3000"
-  #   networks:
-  #     - giraffael_net
-  #   depends_on:
-  #     - api
-  #   restart: unless-stopped
-  #   container_name: giraffael_frontend
-
+    
 networks: 
   giraffael_net: 
 

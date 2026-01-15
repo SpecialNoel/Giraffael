@@ -13,6 +13,6 @@ def delete_room(room_code):
     # Delete all files existed in that room first
     delete_all_files(room_code)
     # Delete the room in database
-    rooms_collection.delete_one({'roomCode': room_code})
+    rooms_collection.delete_one({'room_code': room_code})
     print(f'Successfully deleted room [{room_code}].')
     return

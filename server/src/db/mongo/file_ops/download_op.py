@@ -13,7 +13,7 @@ from src.db.mongo.mongodb_initiator import rooms_collection, gfs
 #       to the client. Client download request has to be done this way given that server
 #       has to first send the metadata of the file to the client, before the whole file can
 #       be sent to the client.
-def download_file(fileID, roomCode, savedir):
+def download_file(fileID, room_code, savedir):
     try: 
         file = gfs.get(ObjectId(fileID))
     except InvalidId:
@@ -24,13 +24,13 @@ def download_file(fileID, roomCode, savedir):
         return
         
     # Test if given room code is in invalid format
-    if not room_code_exists_in_collection(roomCode):
-        print(f'Error in download_file(). Room code [{roomCode}] is invalid.')
+    if not room_code_exists_in_collection(room_code):
+        print(f'Error in download_file(). Room code [{room_code}] is invalid.')
         return
     
     # Test if the file is in database, but not in the given room 
-    if file.metadata['roomCode'] != roomCode:
-        print(f'Error in download_file(). File with fileID [{fileID}] does not exist in room [{roomCode}].')
+    if file.metadata['room_code'] != room_code:
+        print(f'Error in download_file(). File with fileID [{fileID}] does not exist in room [{room_code}].')
         return 
     
     # Start downloading the file
@@ -39,5 +39,5 @@ def download_file(fileID, roomCode, savedir):
     savepath = os.path.join(savedir, filename)
     with open(savepath, 'wb') as f:
         f.write(file.read())
-    print(f'Downloaded file with fileID [{fileID}] from room [{roomCode}], stored at [{savepath}].')
+    print(f'Downloaded file with fileID [{fileID}] from room [{room_code}], stored at [{savepath}].')
     return savepath

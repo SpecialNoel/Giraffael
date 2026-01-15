@@ -12,7 +12,7 @@ def create_room_in_db(room_code, roomName='NewRoom'):
         
         # Room default template
         room_data = {
-            'roomCode': room_code,
+            'room_code': room_code,
             'roomName': roomName,
             'clientList': [],
             'msgList': [],

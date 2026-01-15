@@ -1,0 +1,6 @@
+# requirements.txt
+
+# To run this script: pip install --no-cache-dir -r requirements.txt
+
+argon2-cffi                 # for hashing client password
+websockets==11.0.3         # for client utilizing WebSocket

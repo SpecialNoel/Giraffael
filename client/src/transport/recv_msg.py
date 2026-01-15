@@ -1,27 +1,17 @@
 # recv_msg.py
 
-import json
 import websockets
+
+async def handle_incoming_message(msg):
+    print(f'Received msg: {msg}')
+    return
 
 async def receive_msg(websocket):
     try:
         async for raw_msg in websocket:
-            msg = json.loads(raw_msg)
-            
-            if msg.get('type') == 'ping':
-                print('Received a ping from server.')
-                # Handle ping signal by sending back a pong to server 
-                await websocket.send(json.dumps({'type': 'pong'}))
-                print('\nSent a pong to server')
-            else:
-                # Handle other messages
-                await handle_incoming_message(msg)
+            await handle_incoming_message(raw_msg)
     except websockets.ConnectionClosed:
+        # websockets library manages the heartbeat mechanism automatically
         print('Connection closed by server.')
     except Exception as e:
         print(f'Unexpected error in recv_heartbeat(): {e}.')
-        
-async def handle_incoming_message(msg):
-    print('In handle_incoming_message().')
-    print(f'Received unexpected msg in recv_heartbeat(): [{msg}]')
-    return

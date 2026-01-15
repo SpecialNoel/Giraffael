@@ -5,21 +5,21 @@ from src.db.mongo.msg_ops.general_op import room_code_exists_in_collection
 
 # Check whether room with given room code exist in MongoDB
 def check_room_existence_in_db(room_code):
-    if not room_code_exists_in_collection(room_code):
+    room_exists_in_db = room_code_exists_in_collection(room_code)
+    if room_exists_in_db:
+        print(f'Room [{room_code}] exists in MongoDB.')
+    else:
         print(f'Room [{room_code}] does not exist in MongoDB.')
-        return False
-    print(f'Room [{room_code}] exists in MongoDB.')
-    return True
+    return room_exists_in_db
 
 # Try match given room code, uuid and username with records in MongDB 
-async def check_client_existence_in_db(room_code, uuid, username):
+async def check_client_existence_in_db(client_email, room_code):
     client = rooms_collection.find_one(
         {
-            'roomCode': room_code,
+            'room_code': room_code,
             'clientList': {
                 '$elemMatch': {
-                    'uuid': uuid,
-                    'username': username
+                    'client_email': client_email
                 }
             }
         },

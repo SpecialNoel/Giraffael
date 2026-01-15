@@ -8,5 +8,5 @@ router = APIRouter()
 # WebSocket endpoint that acts like listen() and accept() in python socket
 @router.websocket('/ws')
 async def websocket_endpoint(websocket: WebSocket):
-    print(websocket)
+    print(f'websocket [{websocket}] is trying to connect to server.')
     await manager.connect(websocket)

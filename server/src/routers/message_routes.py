@@ -1,7 +1,7 @@
 # message_routes.py
 
 from fastapi import APIRouter
-from src.schemas.definitions import EncryptedMsg
+from shared.schemas.definitions import EncryptedMsg
 from src.services.message_service import send_msg, fetch_msg
 
 router = APIRouter()

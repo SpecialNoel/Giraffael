@@ -20,7 +20,7 @@ app.include_router(room_routes.router)      # enable the client to connect to th
 app.include_router(file_routes.router)       # enable the client to connect to the manager via '/upload/...' and '/download/...'
 app.include_router(message_routes.router)   # enable the client to connect to the manager via '/send' and '/fetch'
 
-# The following code is commented due to it not being executed with 'docker build'.
+# The following code is commented due to it not being executed with 'docker compose'.
 # if __name__=='__main__':
 #     # Run a uvicorn web server. Initialize a server socket and binds it to the 
 #     #   given host and port.

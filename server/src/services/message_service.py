@@ -1,6 +1,6 @@
 # message_service.py
 
-from src.schemas.definitions import EncryptedMsg
+from shared.schemas.definitions import EncryptedMsg
 
 def send_msg(msg: EncryptedMsg, msgList: dict):
     try:

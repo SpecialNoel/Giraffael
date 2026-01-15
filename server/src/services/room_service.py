@@ -1,31 +1,53 @@
 # room_service.py
 
-from src.schemas.client_obj import Client_Obj
+import json
+from fastapi import WebSocket
+from src.db.mongo.room_ops.check_op import (check_room_existence_in_db, 
+                                            check_client_existence_in_db)
 from src.db.mongo.room_ops.create_op import create_room_in_db
 from src.db.mongo.room_ops.join_op import join_room_in_db
 
-# Create a room with given room code (Create-only operation)
-def create_room_with_room_code(room_code: str):
-    # Create a room in MongoDB with given room code
-    return create_room_in_db(room_code)
-
-# Join the client to the given room (Join-only operation)
-def join_room_with_room_code(roomCode: str, client_obj: Client_Obj): 
-    # Join to a room in MongoDB with given room code
-    return join_room_in_db(roomCode, client_obj)
-
-# Get the online status of clients in Redis
-async def get_online_status_of_clients_in_room(redis, room_code):
-    # Get all uuids from the given room in Redis
-    uuids = await redis.smembers(f'room_code:{room_code}:client_list')
-    result = {}
-    for uuid in uuids:
-        presence = await redis.get(f'presence:{room_code}:{uuid}')
-        result[uuid] = 'online' if presence else 'offline'
-    return result
+async def handle_create_room_request(room_code, websocket: WebSocket):    
+    # Check if the room exists in database
+    room_exists_in_db = check_room_existence_in_db(room_code)
+    if room_exists_in_db:
+        data = {
+            'message': f'Room {room_code} already exists in db',
+            'status': 'failed'
+        }
+        await websocket.send_json(data)
+        await websocket.close()
+        return
     
-# Delete the room in Redis (useful for removing 'zombie clients')
-async def delete_room(redis, room_code):
-    await redis.delete(f'room_code:{room_code}:client_list')
-    print(f'Deleted room [{room_code}] in Redis.')
-    return       
+    # Create the room
+    create_room_in_db(room_code)
+    return
+
+async def handle_join_room_request(room_code, client_email, websocket: WebSocket):    
+    # Check if the room exists in database
+    room_exists_in_db = check_room_existence_in_db(room_code)
+    if not room_exists_in_db:
+        data = {
+            'message': f'Room {room_code} does not exist in db',
+            'status': 'failed'
+        }
+        await websocket.send_json(data)
+        await websocket.close()
+        return
+    # Check if the client exists in the room and in database already
+    client_exists_in_db = await check_client_existence_in_db(client_email, room_code)
+    if client_exists_in_db:
+        # Client tries to join a room they already in
+        print(f'Client [{client_email}] was found in db.')
+        data = {
+            'message': f'Room {room_code} does not exist in db',
+            'status': 'failed'
+        }
+        await websocket.send_json(data)
+        await websocket.close()
+        return
+    else:
+        print(f'Client [{client_email}] was not found in db.')
+        join_room_in_db(room_code, client_email)
+        return     
+    

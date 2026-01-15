@@ -10,38 +10,38 @@ def get_file_extension(filename):
     # Returns the extension of a file, including dot.
     # Example: .txt, .pdf, .png, etc..
     return os.path.splitext(filename)[1]
-def get_file_dir_path(filepath):
-    return os.path.dirname(filepath)
+def get_file_dir_path(file_path):
+    return os.path.dirname(file_path)
 
-# FastAPI logic for uploading a file with given file content and room code
-def upload(uri, roomCode, filename):
+# Upload a file with given file content and room code
+def upload(uri, room_code, filename):
     def ask_file_location(filename, fileExtension):
         root = tk.Tk()
         root.withdraw()
-        filepath = filedialog.askopenfilename(defaultextension=fileExtension, 
-                                           initialfile=filename)
-        return filepath
+        file_path = filedialog.askopenfilename(defaultextension=fileExtension, 
+                                            initialfile=filename)
+        return file_path
     
-    fileExtension = get_file_extension(filename)
-    filepath = ask_file_location(filename, fileExtension)
+    file_extension = get_file_extension(filename)
+    file_path = ask_file_location(filename, file_extension)
     
-    if os.path.isfile(filepath):
+    if os.path.isfile(file_path):
         print(f'✅ File [{filename}] exists on user local machine.')
     else:
         print(f'❌ File [{filename}] does not exist on user local machine.')
     
-    with open(filepath, 'rb') as f:
+    with open(file_path, 'rb') as f:
         files = {'file': (filename, f)}
-        response = requests.post(uri+'upload/'+roomCode, files=files)
+        response = requests.post(uri+'upload/'+room_code, files=files)
         print(f'Response status code: {response.status_code}')
     return 
 
-# FastAPI logic for downloading a file with given filename and room code
-def download(uri, roomCode, filename, chunkSize):
-    def ask_file_save_location(filename, fileExtension):
+# Download a file with given filename and room code
+def download(uri, room_code, filename, chunk_size):
+    def ask_file_save_location(filename, file_extension):
         # Additional arguments for filedialog.asksaveasfilename();
         #   provides default file extensions to users for selection.
-        fileTypes = [('Text files', '*.txt'),
+        file_types = [('Text files', '*.txt'),
                      ('PDF files', '*.pdf'),
                      ('JPG files', '*.jpg'),
                      ('JPEG files', '*.jpeg'),
@@ -50,23 +50,24 @@ def download(uri, roomCode, filename, chunkSize):
         
         root = tk.Tk()
         root.withdraw() # This hides the main window of Tk
-        savePath = filedialog.asksaveasfilename(defaultextension=fileExtension, 
-                                              initialfile=filename)
-        return savePath
+        save_path = filedialog.asksaveasfilename(defaultextension=file_extension, 
+                                               initialfile=filename,
+                                               filetypes=file_types)
+        return save_path
     
     # Setting 'stream' to True allows the client to download the file without loading it into memory
-    response = requests.get(uri+'download/'+roomCode+'/'+filename, stream=True)
+    response = requests.get(uri+'download/'+room_code+'/'+filename, stream=True)
     print(f'Response status code: {response.status_code}')
     
-    fileExtension = get_file_extension(filename)
-    print('file ext:', fileExtension)
-    savePath = ask_file_save_location(filename, fileExtension)
+    file_extension = get_file_extension(filename)
+    print('file ext:', file_extension)
+    save_path = ask_file_save_location(filename, file_extension)
     try: 
-        with open(savePath, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=chunkSize):
+        with open(save_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
-        fileDirPath = get_file_dir_path(savePath)
-        print(f'✅ File [{filename}] downloaded successfully. It is stored in [{fileDirPath}].')
+        file_dir_path = get_file_dir_path(save_path)
+        print(f'✅ File [{filename}] downloaded successfully. It is stored in [{file_dir_path}].')
     except Exception as e:
         print(f'❌ Failed to download file [{filename}].')
         print(f'Failed reason: {e}.')

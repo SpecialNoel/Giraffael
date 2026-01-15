@@ -3,7 +3,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Literal
-
+    
 class EncryptedMsg(BaseModel):
     typeOfMsg: str
     senderID: str
@@ -17,7 +17,3 @@ class Message(BaseModel):
     payload: dict
     timestamp: datetime
     
-    
-class RoomRequest(BaseModel):
-    room_code: str
-    username: str

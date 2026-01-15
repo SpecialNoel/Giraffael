@@ -14,5 +14,6 @@ uri = (f'mongodb+srv://jianminglin2893:{database_password}' +
        '?retryWrites=true&w=majority&tls=true')
 mongoClient = MongoClient(uri, serverSelectionTimeoutMS=3000)
 db = mongoClient['GiraffaelDB']
+users_collection = db['Users']
 rooms_collection = db['Rooms']
 gfs = gridfs.GridFS(db)

@@ -4,18 +4,18 @@ import os
 import time
 import redis.asyncio as redis
 from fastapi import WebSocket
-from src.services.client_service import (connect_with_client, 
-                                         disconnect_from_client, 
-                                         disconnect_all_clients_from_a_room)
-from src.services.room_service import delete_room
+from src.services.connection_service import connect_with_client
+from src.db.redis.connection_ops.disconnect_op import (disconnect_from_client, 
+                                                       disconnect_all_clients_from_a_room)
+from src.db.redis.room_ops.delete_op import delete_room
 from src.services.pub_sub_service import subscribe_to_channel
 
-redis_host = os.environ.get("REDIS_HOST", "localhost")
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
 redis_port = 6379
 
 class ConnectionManager:
     def __init__(self):
-        # room_code maps to { uuid maps to (WebSocket, username) }
+        # room_code maps to { uuid maps to (WebSocket, session_id) }
         self.active: dict[str, dict[str, dict[WebSocket, str]]] = {}
         self.redis_client = None
         self.TIME_THRESHOLD = 60
@@ -27,7 +27,6 @@ class ConnectionManager:
             try: 
                 # self.redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
                 self.redis_client = redis.from_url(f'redis://{redis_host}:{redis_port}?decode_responses=True')
-                await self.redis_client.ping()
                 print('Connected to Redis.')
                 break
             except redis.exceptions.ConnectionError:

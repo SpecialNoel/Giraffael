@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from src.schemas.definitions import Message
 
 # Redis subscribes to the channel (NOT client subscribe to channel)
-async def subscribe_to_channel(redis, active, room_code):
+async def subscribe_to_channel(redis_client, active, room_code):
     async def broadcast(room_code, msg_obj: Message):
         clients = active.get(room_code, {})
         for uuid, info in clients.items():
@@ -18,7 +18,7 @@ async def subscribe_to_channel(redis, active, room_code):
                 print(f'Failed to send json message to client [{uuid}]. Reason: {e}.')
     
     # Subscribe to channel
-    pubsub = redis.pubsub()
+    pubsub = redis_client.pubsub()
     await pubsub.subscribe(f'room_code:{room_code}:channel')
     
     # Note: 'async for' runs indefinitely as a background task.
@@ -31,8 +31,8 @@ async def subscribe_to_channel(redis, active, room_code):
     return
 
 # Publish Message to channel via Redis
-async def publish_to_channel(redis, room_code, msg: Message):
-    await redis.publish(f'room_code:{room_code}:channel', msg.model_dump_json())
+async def publish_to_channel(redis_client, room_code, msg: Message):
+    await redis_client.publish(f'room_code:{room_code}:channel', msg.model_dump_json())
     return     
 
 # Publish chat message to channel via Redis

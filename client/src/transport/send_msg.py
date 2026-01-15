@@ -1,24 +1,15 @@
 # sned_msg.py
 
-import json
 import requests
 
-async def send_chat_message(room_code, uuid_str, user_input, websocket):
-    msg = {
-        'type': 'chat',
-        'room_code': room_code,
-        'uuid': uuid_str,
-        'payload': user_input,
-    }
-    await websocket.send(json.dumps(msg))
-    print('Sent message to server. ')
-    return
-
-async def send_create_room_request(base_http_uri, username, room_code):
+async def send_create_room_request(base_http_uri, session_id, room_code):
     print('Sending the create room request to server.')
     
     room_creation_uri = base_http_uri + '/room/create'
-    data = {'room_code': room_code, 'username': username}
+    data = {
+        'room_code': room_code, 
+        'session_id': session_id
+    }
     
     response = requests.post(room_creation_uri, json=data)
     print(f'Response status code: {response.status_code}')

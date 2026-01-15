@@ -4,10 +4,7 @@ from src.db.mongo.msg_ops.general_op import room_code_exists_in_collection
 from src.db.mongo.mongodb_initiator import rooms_collection
 
 # Join the client to a given room in MongoDB
-def join_room_in_db(room_code, client_obj):
-    uuid = client_obj.get_uuid()
-    username = client_obj.get_username()
-
+def join_room_in_db(room_code, uuid, username):
     # Check room code validness
     if not room_code_exists_in_collection(room_code):
         print(f'Error in add_client_to_list().'+
@@ -19,7 +16,7 @@ def join_room_in_db(room_code, client_obj):
     # Add client into client list of this room
     try:
         rooms_collection.update_one(
-            {'roomCode': room_code},
+            {'room_code': room_code},
             {'$push': {'clientList': client_info}}
         )
         print(f'Successfully added client [{uuid}] to the room [{room_code}]')
